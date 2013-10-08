@@ -24,6 +24,7 @@
 //
 
 #import "REFormattedNumberField.h"
+#import "REFormattedNumberFieldDelegate.h"
 
 @interface REFormattedNumberField ()
 
@@ -72,6 +73,11 @@
             strongSelf.currentFormattedText = textField.text;
         });
     }
+  
+  // check for delegate handler
+  if (self.delegate && [self.delegate respondsToSelector:@selector(textFieldDidEdit:)]){
+    [(id)self.delegate textFieldDidEdit:self];
+  }
 }
 
 - (void)deleteBackward
@@ -103,10 +109,15 @@
     [self sendActionsForControlEvents:UIControlEventEditingChanged];
 }
 
+- (NSString *)unformattedTextFromString:(NSString*)formattedText
+{
+  NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\D" options:NSRegularExpressionCaseInsensitive error:NULL];
+  return [regex stringByReplacingMatchesInString:formattedText options:0 range:NSMakeRange(0, self.text.length) withTemplate:@""];
+}
+
 - (NSString *)unformattedText
 {
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\D" options:NSRegularExpressionCaseInsensitive error:NULL];
-    return [regex stringByReplacingMatchesInString:self.text options:0 range:NSMakeRange(0, self.text.length) withTemplate:@""];
+  return [self unformattedTextFromString:self.text];
 }
 
 @end
